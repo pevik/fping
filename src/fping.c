@@ -1208,6 +1208,14 @@ int main(int argc, char **argv)
          * for each of them */
         for (cursor = event_queue_ping.first; cursor; cursor = cursor->ev_next) {
             table[i] = cursor->host;
+
+            struct in6_addr a6;
+            if (inet_pton(AF_INET6, cursor->host->host, &a6) && IN6_IS_ADDR_V4MAPPED(&a6)) {
+                cursor->host->host = strrchr(cursor->host->host, ':') + 1;
+                cursor->host->saddr.ss_family = AF_INET;
+                printf("IPv4-Mapped-in-IPv6 address, using IPv4 %s\n", cursor->host->host);
+            }
+
             cursor->host->i = i;
             i++;
         }
